@@ -441,13 +441,21 @@ if uploaded_data_file is not None:
 
             st.altair_chart(layered_hist_plot, use_container_width=True)
     
+    strip_plot = st.sidebar.checkbox("Strip Plot with Jitter")
+    if strip_plot:
+        strip_fig = alt.Chart(table_filtered).mark_tick().encode(
+            x='gdl_cm:Q',
+            y='trial_type:O'
+        )
+
+        st.altair_chart(strip_fig, use_container_width=True)
+
     correlation_plot = st.sidebar.checkbox("Show correlations")
     if correlation_plot:
         st.write("Correlations")
         table_filtered_corr = table_filtered[["pH", "compaction", "bulk_dens", "poros", "wc", "whc", "RA7", "el_cond", "amb_temp", "in_temp",
         "oc", "col_rad", "days", "subs_cm", "gdl_cm", "year", "load_avg",
         "ox_eff_avg"]]
-        st.write(table_filtered_corr.dtypes)
         corr = table_filtered_corr.corr()
         st.write(corr.style.background_gradient(cmap='coolwarm'))
 
