@@ -117,6 +117,37 @@ if uploaded_data_file is not None:
 
         st.altair_chart(linechart, use_container_width=True)
 
+    if radial_chart:
+        st.subheader("Radial Chart for subs_cat")
+
+        table_filtered_subs_cat = table_filtered[["subs_cat", "Unnamed: 0"]]
+        
+        table_filtered_subs_cat = table_filtered_subs_cat.groupby("subs_cat").count().reset_index()
+        table_filtered_subs_cat = table_filtered_subs_cat.rename(columns = {"subs_cat": "subs_cat_type", "Unnamed: 0": "subs_cat_count"})
+
+        base = alt.Chart(table_filtered_subs_cat).encode(
+            alt.Theta("subs_cat_count:Q").stack(True),
+            alt.Radius("subs_cat_count").scale(type="sqrt", zero=True, rangeMin=20),
+            color="subs_cat_count:N",
+        )
+
+        c1 = base.mark_arc(innerRadius=20, stroke="#fff")
+
+        c2 = base.mark_text(radiusOffset=10).encode(text="subs_cat_count:Q")
+
+        st.altair_chart(c1 + c2)
+
+    if pie_chart:
+        table_filtered_gdl_subs = table_filtered[["gdl_subs", "Unnamed: 0"]]
+        
+        table_filtered_gdl_subs = table_filtered_gdl_subs.groupby("gdl_subs").count().reset_index()
+        table_filtered_gdl_subs = table_filtered_gdl_subs.rename(columns = {"gdl_subs": "gdl_subs_type", "Unnamed: 0": "gdl_subs_count"})
+
+        alt.Chart(table_filtered).mark_arc().encode(
+            theta="gdl_subs_count",
+            color="gdl_subs_type"
+        )
+
     if cumsum_linechart:
         st.subheader("Cumulative Sum Line Chart Country")
 
@@ -284,18 +315,18 @@ if uploaded_data_file is not None:
             options_one = table_filtered[["ox_eff_avg"]].columns
             var1 = st.selectbox("Please select the Measurement variable you want to visualize on the X-axis",
                             options = options_one)
-            var1_series = table_new[var1]
+            var1_series = table_filtered[var1]
 
         with col2:
 
             options_two = table_filtered[["pH", "compaction", "bulk_dens", "poros", "wc", "whc", "RA7",
-              "el_cond", "amb_temp", "in_temp", "oc", "mc"]].columns
+              "el_cond", "amb_temp", "in_temp", "oc", "mc", "ch4_conc"]].columns
             
 
             #options_two = table_filtered.columns
             var2 = st.selectbox("Please select the Stress variables you want to visualize on the Y-axis",
                             options=options_two)
-            var2_series = table_new[var2]
+            var2_series = table_filtered[var2]
 
 
         scatter_plot = alt.Chart(table_filtered).mark_circle(size = 60).encode(
@@ -308,13 +339,13 @@ if uploaded_data_file is not None:
 
         add_color_var = st.checkbox("Add 'subs_cat' or other variable as color")
         if add_color_var:
-            options_three = table_new[["subs_cat"]].columns
+            options_three = table_filtered[["subs_cat"]].columns
 
             var3 = st.selectbox("Select variable for coloring:",
                                 options=options_three
                                 )
             
-            var3_series = table_new[var3]
+            var3_series = table_filtered[var3]
 
             combined_plot_data = pd.concat([var1_series, var2_series, var3_series], axis=1)
 
@@ -326,6 +357,113 @@ if uploaded_data_file is not None:
 
             st.altair_chart(combined_plot, use_container_width=True)
 
+    if multifeature_scatter:
+        st.subheader("Multifeature Scatter Plots")
+
+        col1_m, col2_m = st.columns(2, gap="medium")
+
+        with col1_m:
+
+            options_one = table_filtered[["pH", "compaction", "bulk_dens", "poros", "wc", "whc", "RA7",
+              "el_cond", "amb_temp", "in_temp", "oc", "mc", "ch4_conc"]].columns
+            
+
+            #options_two = table_filtered.columns
+            var1_m = st.selectbox("Please select the Stress variables you want to visualize on the Y-axis",
+                            options=options_one)
+            var1_series_m = table_filtered[var1_m]
+
+        with col2_m:
+            options_two = table_filtered[["load_avg"]].columns
+            var2_m = st.selectbox("Please select the Measurement variable you want to visualize on the X-axis",
+                            options = options_two)
+            var2_series_m = table_filtered[var2_m]
+
+
+
+        combined_plot = alt.Chart(table_filtered).mark_circle(size = 60).encode(
+            x = "ox_eff_avg",
+            y = var2_m,
+            tooltip=["country", "year", "trial", "trial_type", "subs", "load_avg", "ox_eff_avg"]
+        ).interactive()
+
+        st.altair_chart(combined_plot, use_container_width=True)
+
+        add_regression_line = st.checkbox("Add regression line:")
+        if add_regression_line:
+
+            st.write("Variable 1 is: ", var1_m)
+            st.write("Variable 2 is: ", var2_m)
+
+            final_plot = combined_plot + combined_plot.transform_regression(var1_m, var2_m).mark_line() 
+            st.altair_chart(final_plot, use_container_width=True)
+
+        add_color_var = st.checkbox("Add 'ox_eff_avg' or other variable as color")
+        if add_color_var:
+            options_three = table_filtered[["ox_eff_avg"]].columns
+
+            var3_m = st.selectbox("Select variable for coloring:",
+                                options=options_three
+                                )
+            
+            var3_series_m = table_filtered[var3_m]
+
+            combined_plot_data = pd.concat([var1_series_m, var2_series_m, var3_series_m], axis=1)
+
+            combined_plot = alt.Chart(combined_plot_data).mark_circle(size=60).encode(
+                x=var1_m,
+                y=var2_m,
+                color = var3_m
+            ).interactive()
+
+            st.altair_chart(combined_plot, use_container_width=True)
+
+
+    if layered_hist:
+        rel_cols = ["gdl_cm", "col_rad", "load_avg given", "load_avg derived", "load_avg estimated",
+                   "ox_avg given", "ox_avg derived", "ox_avg estimated",
+                   "ox_eff_avg given", "ox_eff_avg derived", "ox_eff_avg estimated",
+                   "days given", "days derived", "days estimated"]
+        
+        histogram_variable_selection = st.multiselect("Pick the column(s) you want to visualize in layered histogram:",
+                   table_filtered.columns,
+                   default = ["gdl_cm", "pH", "col_rad"],
+                   placeholder="Select 3 desired columns ...")
+
+        
+        table_filtered_hist_vars = table_filtered[histogram_variable_selection]
+        
+        if len(histogram_variable_selection) == 2:
+
+            layered_hist_plot = alt.Chart(table_filtered_hist_vars).transform_fold(
+                [histogram_variable_selection[0], histogram_variable_selection[1]],
+                as_=['Experiment', 'Measurement']
+            ).mark_bar(
+                opacity=0.3,
+                binSpacing=0
+            ).encode(
+                alt.X('Measurement:Q').bin(maxbins=100),
+                alt.Y('count()').stack(None),
+                alt.Color('Experiment:N')
+            )
+
+            st.altair_chart(layered_hist_plot, use_container_width=True)
+
+        if len(histogram_variable_selection) == 3:
+
+            layered_hist_plot = alt.Chart(table_filtered_hist_vars).transform_fold(
+                [histogram_variable_selection[0], histogram_variable_selection[1], histogram_variable_selection[2]],
+                as_=['Experiment', 'Measurement']
+            ).mark_bar(
+                opacity=0.3,
+                binSpacing=0
+            ).encode(
+                alt.X('Measurement:Q').bin(maxbins=100),
+                alt.Y('count()').stack(None),
+                alt.Color('Experiment:N')
+            )
+
+            st.altair_chart(layered_hist_plot, use_container_width=True)
 
     ##### CMD + Shift + /
     # col1, col2 = st.columns(2, gap="medium")
