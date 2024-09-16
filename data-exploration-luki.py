@@ -60,7 +60,7 @@ if uploaded_data_file is not None:
 
     simple_linechart = st.sidebar.checkbox("Simple Linechart")
     cumsum_linechart = st.sidebar.checkbox("Cumulative Sum Linechart")
-    bump_linechart = st.sidebar.checkbox("Bump Linechart")
+
 
     stacked_barchart_text = st.sidebar.checkbox("Stacked Bar Chart with text overlay")
     violin_chart = st.sidebar.checkbox("Violin Plot to compare distributions")
@@ -228,29 +228,6 @@ if uploaded_data_file is not None:
 
         #st.altair_chart(linechart, use_container_width=True)
 
-    if bump_linechart:
-
-        table_filtered_grouped_year_trial_type = table_filtered[["year", "trial_type"]].groupby("trial_type").count().reset_index()        
-        #st.write(table_filtered.trial_type.unique())
-        bump_chart_trial_type = alt.Chart(table_filtered_grouped_year_trial_type).mark_line(point=True).encode(
-            x=alt.X("year:O").timeUnit("year").title("date"),
-            y="trial_type:O",
-            color=alt.Color("trial_type:N")
-        )
-        #).transform_window(
-        #    rank="rank()",
-        #    sort=[alt.SortField("trial_type", order="descending")],
-        #    groupby=["year"]
-        #).properties(
-        #    title="Bump Chart for Trial types",
-        #    width=600,
-        #    height=150,
-        #)
-
-        st.altair_chart(bump_chart_trial_type, use_container_width = True)
-
-        st.write("needs to be implemented")
-
 
     ### new selection
     if stacked_barchart_text:
@@ -382,7 +359,7 @@ if uploaded_data_file is not None:
 
 
         combined_plot = alt.Chart(table_filtered).mark_circle(size = 60).encode(
-            x = "ox_eff_avg",
+            x = var1_m,
             y = var2_m,
             tooltip=["country", "year", "trial", "trial_type", "subs", "load_avg", "ox_eff_avg"]
         ).interactive()
@@ -417,7 +394,6 @@ if uploaded_data_file is not None:
             ).interactive()
 
             st.altair_chart(combined_plot, use_container_width=True)
-
 
     if layered_hist:
         rel_cols = ["gdl_cm", "col_rad", "load_avg given", "load_avg derived", "load_avg estimated",
