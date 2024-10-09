@@ -72,6 +72,8 @@ if uploaded_data_file is not None:
     radial_chart = st.sidebar.checkbox("Radial Chart")
     pie_chart = st.sidebar.checkbox("Pie Chart")
     layered_hist = st.sidebar.checkbox("Layered Histogram")
+
+    simple_hist = st.sidebar.checkbox("Simple Histogram")
     
     multifeature_scatter = st.sidebar.checkbox("Multifeature Scatter plot")
 
@@ -83,8 +85,21 @@ if uploaded_data_file is not None:
         table_filtered_grouped_year = table_filtered[["year", "Reference"]].groupby("year").count().reset_index()
     #st.write(table_filtered_grouped_year)
         linechart_years = alt.Chart(table_filtered_grouped_year).mark_line().encode(
-        x = "year",
+        x = "year:N", # TODO - 
         y = "Reference"
+        ).interactive()
+    
+        st.altair_chart(linechart_years, use_container_width = True)
+
+        # TODO - 
+
+        st.subheader("Line Chart subs_cat")
+        st.write(table_filtered.subs_cat.unique())
+        table_filtered_grouped_year = table_filtered[["year", "subs_cat"]].groupby("year").sum().reset_index()
+    #st.write(table_filtered_grouped_year)
+        linechart_years = alt.Chart(table_filtered_grouped_year).mark_line().encode(
+        x = "year:N", # TODO - 
+        y = "subs_cat"
         ).interactive()
     
         st.altair_chart(linechart_years, use_container_width = True)
@@ -125,10 +140,11 @@ if uploaded_data_file is not None:
         table_filtered_subs_cat = table_filtered_subs_cat.groupby("subs_cat").count().reset_index()
         table_filtered_subs_cat = table_filtered_subs_cat.rename(columns = {"subs_cat": "subs_cat_type", "Unnamed: 0": "subs_cat_count"})
 
+
         base = alt.Chart(table_filtered_subs_cat).encode(
             alt.Theta("subs_cat_count:Q").stack(True),
             alt.Radius("subs_cat_count").scale(type="sqrt", zero=True, rangeMin=20),
-            color="subs_cat_count:N",
+            color="subs_cat_type:N",
         )
 
         c1 = base.mark_arc(innerRadius=20, stroke="#fff")
@@ -285,6 +301,16 @@ if uploaded_data_file is not None:
     if scatter_href:
         st.subheader("Scatter Plots with href")
 
+        scatter_plot_load_vs_ox = alt.Chart(table_filtered).mark_circle(size = 60).encode(
+            alt.X("load_avg"),
+            alt.Y("ox_eff_avg").axis(format='%'),
+            tooltip=["country", "year", "trial", "trial_type", "subs", "load_avg", "ox_eff_avg"]
+        ).interactive()
+
+        scatter_reg = scatter_plot_load_vs_ox + scatter_plot_load_vs_ox.transform_regression("load_avg", "ox_eff_avg").mark_line() 
+        st.altair_chart(scatter_reg, use_container_width=True)
+        
+
         col1, col2 = st.columns(2, gap="medium")
 
         with col1:
@@ -304,15 +330,19 @@ if uploaded_data_file is not None:
             var2 = st.selectbox("Please select the Stress variables you want to visualize on the Y-axis",
                             options=options_two)
             var2_series = table_filtered[var2]
+        
+        #table_filtered = table_filtered.dropna()
 
 
         scatter_plot = alt.Chart(table_filtered).mark_circle(size = 60).encode(
-            x = "ox_eff_avg",
+            alt.X("ox_eff_avg").axis(format='%'),
             y = var2,
             tooltip=["country", "year", "trial", "trial_type", "subs", "load_avg", "ox_eff_avg"]
         ).interactive()
 
         st.altair_chart(scatter_plot, use_container_width=True)
+        #scatter_with_regline = scatter_plot + scatter_plot.transform_regression(var1_series, var2_series).mark_line()
+        #st.altair_chart(scatter_with_regline, use_container_width=True)
 
         add_color_var = st.checkbox("Add 'subs_cat' or other variable as color")
         if add_color_var:
@@ -333,6 +363,28 @@ if uploaded_data_file is not None:
             ).interactive()
 
             st.altair_chart(combined_plot, use_container_width=True)
+        
+        add_color_var_trial = st.checkbox("Add 'trial_type' or other variable as color")
+        if add_color_var_trial:
+            options_three = table_filtered[["trial_type"]].columns
+
+            var3 = st.selectbox("Select variable for coloring:",
+                                options=options_three
+                                )
+            
+            var3_series = table_filtered[var3]
+
+            combined_plot_data = pd.concat([var1_series, var2_series, var3_series], axis=1)
+
+            combined_plot = alt.Chart(combined_plot_data).mark_circle(size=60).encode(
+                x=var1,
+                y=var2,
+                color = var3
+            ).interactive()
+
+            #st.altair_chart(combined_plot + combined_plot.transform_regression(var1_series, var2_series).mark_line())
+
+            st.altair_chart(combined_plot, use_container_width=True)
 
     if multifeature_scatter:
         st.subheader("Multifeature Scatter Plots")
@@ -351,7 +403,7 @@ if uploaded_data_file is not None:
             var1_series_m = table_filtered[var1_m]
 
         with col2_m:
-            options_two = table_filtered[["load_avg"]].columns
+            options_two = table_filtered[["ox_eff_avg"]].columns
             var2_m = st.selectbox("Please select the Measurement variable you want to visualize on the X-axis",
                             options = options_two)
             var2_series_m = table_filtered[var2_m]
@@ -377,7 +429,7 @@ if uploaded_data_file is not None:
 
         add_color_var = st.checkbox("Add 'ox_eff_avg' or other variable as color")
         if add_color_var:
-            options_three = table_filtered[["ox_eff_avg"]].columns
+            options_three = table_filtered[["pH"]].columns
 
             var3_m = st.selectbox("Select variable for coloring:",
                                 options=options_three
@@ -395,7 +447,35 @@ if uploaded_data_file is not None:
 
             st.altair_chart(combined_plot, use_container_width=True)
 
+    if simple_hist:
+        hist_cols = ["gdl_cm",
+                "col_rad",
+                "load_avg",
+                "ox_avg",
+                "ox_eff_avg",
+                "days",
+                "subs_cm"]
+
+        options = table_filtered[hist_cols].columns
+        
+
+        #options_two = table_filtered.columns
+        var_selected = st.selectbox("Please select the variables to visualize in Histogram",
+                        options=options)
+        var_var_selected = table_filtered[var_selected]
+
+        st.subheader("Histogram subs_cm")
+        simple_hist = alt.Chart(table_filtered).mark_bar().encode(
+            alt.X(f"{var_selected}:Q", bin=True),
+            y='count()',
+        )
+
+        st.altair_chart(simple_hist, use_container_width=True)
+
+
     if layered_hist:
+
+
         rel_cols = ["gdl_cm", "col_rad", "load_avg given", "load_avg derived", "load_avg estimated",
                    "ox_avg given", "ox_avg derived", "ox_avg estimated",
                    "ox_eff_avg given", "ox_eff_avg derived", "ox_eff_avg estimated",
