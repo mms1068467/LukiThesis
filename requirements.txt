@@ -1,4 +1,5 @@
 ﻿altair
+matplotlib
 openpyxl
 streamlit
 
