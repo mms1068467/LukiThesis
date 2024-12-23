@@ -433,9 +433,9 @@ if uploaded_data_file is not None:
         
             corr_table = table_filtered[["load_avg", "ox_eff_avg"]].dropna()
 
-            st.write(f"Correlation (Person): {scipy.stats.pearsonr(corr_table["load_avg"], corr_table["ox_eff_avg"])[0]}")
-            st.write(f"Correlation (Spearman): {scipy.stats.spearmanr(corr_table["load_avg"], corr_table["ox_eff_avg"])[0]}")
-            st.write(f"Correlation (Kendall): {scipy.stats.kendalltau(corr_table["load_avg"], corr_table["ox_eff_avg"])[0]}")
+            st.write(f'Correlation (Person): {scipy.stats.pearsonr(corr_table["load_avg"], corr_table["ox_eff_avg"])[0]}')
+            st.write(f'Correlation (Spearman): {scipy.stats.spearmanr(corr_table["load_avg"], corr_table["ox_eff_avg"])[0]}')
+            st.write(f'Correlation (Kendall): {scipy.stats.kendalltau(corr_table["load_avg"], corr_table["ox_eff_avg"])[0]}')
 
 
             simple_scatter_plot_with_line = simple_scatter_plot + simple_scatter_plot.transform_regression("load_avg", "ox_eff_avg").mark_line(color = "red") 
