@@ -559,7 +559,7 @@ if uploaded_data_file is not None:
             simple_hist = alt.Chart(table_filtered_hist_vars).mark_bar().encode(
                 alt.X(f"{histogram_variable_selection[0]}:Q", bin=True),
                 y='count()',
-            )
+            ).interactive()
 
             st.altair_chart(simple_hist, use_container_width=True)
 
@@ -576,7 +576,7 @@ if uploaded_data_file is not None:
                 alt.X('Measurement:Q').bin(maxbins=100),
                 alt.Y('count()').stack(None),
                 alt.Color('Experiment:N')
-            )
+            ).interactive()
 
             st.altair_chart(layered_hist_plot, use_container_width=True)
 
@@ -592,7 +592,7 @@ if uploaded_data_file is not None:
                 alt.X('Measurement:Q').bin(maxbins=100),
                 alt.Y('count()').stack(None),
                 alt.Color('Experiment:N')
-            )
+            ).interactive()
 
             st.altair_chart(layered_hist_plot, use_container_width=True)
     
