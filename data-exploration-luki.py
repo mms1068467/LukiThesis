@@ -3,6 +3,7 @@ from pathlib import Path
 import os
 import pandas as pd
 import numpy as np
+import scipy
 
 import altair as alt
 from io import BytesIO
@@ -67,7 +68,7 @@ if uploaded_data_file is not None:
 
     scatter_href = st.sidebar.checkbox("Scatter Plots with href")
 
-    line_chart = st.sidebar.checkbox("Linechart")
+    #line_chart = st.sidebar.checkbox("Linechart")
 
     radial_chart = st.sidebar.checkbox("Radial Chart")
     pie_chart = st.sidebar.checkbox("Pie Chart")
@@ -75,6 +76,8 @@ if uploaded_data_file is not None:
 
     simple_hist = st.sidebar.checkbox("Simple Histogram")
     
+    simple_scatter = st.sidebar.checkbox("Simple Scatter plot")
+
     multifeature_scatter = st.sidebar.checkbox("Multifeature Scatter plot")
 
     #### Simple line chart
@@ -93,16 +96,17 @@ if uploaded_data_file is not None:
 
         # TODO - 
 
-        st.subheader("Line Chart subs_cat")
-        st.write(table_filtered.subs_cat.unique())
-        table_filtered_grouped_year = table_filtered[["year", "subs_cat"]].groupby("year").sum().reset_index()
-    #st.write(table_filtered_grouped_year)
-        linechart_years = alt.Chart(table_filtered_grouped_year).mark_line().encode(
-        x = "year:N", # TODO - 
-        y = "subs_cat"
-        ).interactive()
+    #     st.subheader("Line Chart subs_cat")
+    #     st.write(table_filtered.subs_cat.unique())
+    #     table_filtered_grouped_year = table_filtered[["year", "subs_cat"]].groupby("subs_cat").sum().reset_index()
+    #     st.write(table_filtered_grouped_year)
+    # #st.write(table_filtered_grouped_year)
+    #     linechart_years = alt.Chart(table_filtered_grouped_year).mark_line().encode(
+    #     x = "year:N", # TODO - 
+    #     y = "subs_cat"
+    #     ).interactive()
     
-        st.altair_chart(linechart_years, use_container_width = True)
+    #     st.altair_chart(linechart_years, use_container_width = True)
 
         st.subheader("Variable selection for simple line chart:")
 
@@ -110,7 +114,7 @@ if uploaded_data_file is not None:
 
         with col1_sel:
 
-            options_var_one = table_filtered.columns
+            options_var_one = table_filtered[["year"]].columns
             var1_selection = st.selectbox("Select variable you want to visualize on the X-axis",
                             options = options_var_one)
             var1_variable = table_filtered[var1_selection]
@@ -123,12 +127,23 @@ if uploaded_data_file is not None:
             
             var2_variable = table_filtered[var2_selection]
 
-        st.subheader("Simple Line Chart")
-        linechart = alt.Chart(table_filtered).mark_line().encode(
-        x = var1_selection,
+
+        st.subheader(f"Number of {var2_selection} per year")
+        table_selected_grouped_year = table_filtered[[var1_selection, var2_selection]].groupby(var1_selection).count().reset_index()
+    #st.write(table_filtered_grouped_year)
+        linechart = alt.Chart(table_selected_grouped_year).mark_line().encode(
+        x = "year:N", # TODO - 
         y = var2_selection,
-        tooltip=["country", "year", "trial", "trial_type", "subs", "load_avg", "ox_eff_avg"]
+        #tooltip=["country", "year", "trial", "trial_type", "subs", "load_avg", "ox_eff_avg"]
+        # ).properties(
+        # title = "Title"
         ).interactive()
+
+        # linechart = alt.Chart(table_filtered).mark_line().encode(
+        # x = var1_selection,
+        # y = var2_selection,
+        # tooltip=["country", "year", "trial", "trial_type", "subs", "load_avg", "ox_eff_avg"]
+        # ).interactive()
 
         st.altair_chart(linechart, use_container_width=True)
 
@@ -187,9 +202,9 @@ if uploaded_data_file is not None:
 
         st.subheader("Cumulative Sum Line Chart Subs_cat")
     
-        table_filtered_grouped_year_country = table_filtered[["year", "subs_cat"]].groupby("year").count().reset_index()
+        table_filtered_grouped_year_subscat = table_filtered[["year", "subs_cat"]].groupby("year").count().reset_index()
 
-        cumsum_subs_cat = alt.Chart(table_filtered_grouped_year_country, width=600).mark_line().transform_window(
+        cumsum_subs_cat = alt.Chart(table_filtered_grouped_year_subscat, width=600).mark_line().transform_window(
             # Sort the data chronologically
             sort=[{'field': 'year'}],
             # Include all previous records before the current record and none after
@@ -207,11 +222,12 @@ if uploaded_data_file is not None:
 
         st.header("old code placeholder")
 
-        
+        table_filtered_grouped_year_trialtype = table_filtered[["year", "trial_type"]].groupby("year").count().reset_index()    
     
-        cumsum = alt.Chart(table_filtered_grouped_year).mark_line().encode(
-        x = "year",
-        y = "Reference"
+
+        cumsum = alt.Chart(table_filtered_grouped_year_trialtype).mark_line().encode(
+        x = "year:O",
+        y = "sum(trial_type)"
         ).interactive()
     
         st.altair_chart(cumsum, use_container_width = True)
@@ -235,12 +251,7 @@ if uploaded_data_file is not None:
             
             var2_variable = table_filtered[var2_selection]
 
-        st.subheader("Simple Line Chart")
-        linechart = alt.Chart(table_filtered).mark_line().encode(
-        x = var1_selection,
-        y = var2_selection,
-        tooltip=["country", "year", "trial", "trial_type", "subs", "load_avg", "ox_eff_avg"]
-        ).interactive()
+        st.write("not implemented")
 
         #st.altair_chart(linechart, use_container_width=True)
 
@@ -248,21 +259,36 @@ if uploaded_data_file is not None:
     ### new selection
     if stacked_barchart_text:
 
-        table_filtered_grouped_trial_type_subs_cat = table_filtered[["trial_type", "subs_cat"]].groupby("trial_type").count().reset_index()        
-        st.write(table_filtered[["trial_type", "subs_cat"]])
+        table_filtered_grouped_trial_type_subs_cat = table_filtered[["trial_type", "subs_cat"]].groupby(["trial_type"]).count().reset_index()        
+        st.write(table_filtered_grouped_trial_type_subs_cat)
 
         st.subheader("Stacked bar chart")
+    #     bars = alt.Chart(table_filtered_grouped_trial_type_subs_cat).mark_bar().encode(
+    #     x=alt.X('subs_cat:N').stack('zero'),
+    #     y=alt.Y('trial_type'),
+    #     #color=alt.Color('site')
+    # )
+
+    #     text = alt.Chart(table_filtered_grouped_trial_type_subs_cat).mark_text(dx=-15, dy=3, color='white').encode(
+    #         x=alt.X('subs_cat:N').stack('zero'),
+    #         y=alt.Y('trial_type'),
+    #         #detail='site:N',
+    #         #text=alt.Text('sum(subs_cat)', format='.1f')
+    #     )
+
         bars = alt.Chart(table_filtered_grouped_trial_type_subs_cat).mark_bar().encode(
-        x=alt.X('subs_cat:N').stack('zero'),
-        y=alt.Y('trial_type'),
+        x=alt.X('trial_type'),
+        y=alt.Y('subs_cat'),
+        #y=alt.Y('subs_cat:N').stack('zero'),
         #color=alt.Color('site')
     )
 
         text = alt.Chart(table_filtered_grouped_trial_type_subs_cat).mark_text(dx=-15, dy=3, color='white').encode(
-            x=alt.X('subs_cat:N').stack('zero'),
-            y=alt.Y('trial_type'),
+            x=alt.X('trial_type'),
+            y=alt.Y('subs_cat'),
+            #y=alt.Y('subs_cat:N').stack('zero'),
             #detail='site:N',
-            text=alt.Text('subs_cat', format='.1f')
+            #text=alt.Text('sum(subs_cat)', format='.1f')
         )
 
         st.altair_chart(bars + text, use_container_width = True)
@@ -302,8 +328,8 @@ if uploaded_data_file is not None:
         st.subheader("Scatter Plots with href")
 
         scatter_plot_load_vs_ox = alt.Chart(table_filtered).mark_circle(size = 60).encode(
-            alt.X("load_avg"),
-            alt.Y("ox_eff_avg").axis(format='%'),
+            alt.X("ox_eff_avg").axis(format='%'),
+            alt.Y("load_avg"),  
             tooltip=["country", "year", "trial", "trial_type", "subs", "load_avg", "ox_eff_avg"]
         ).interactive()
 
@@ -341,8 +367,13 @@ if uploaded_data_file is not None:
         ).interactive()
 
         st.altair_chart(scatter_plot, use_container_width=True)
-        #scatter_with_regline = scatter_plot + scatter_plot.transform_regression(var1_series, var2_series).mark_line()
-        #st.altair_chart(scatter_with_regline, use_container_width=True)
+        
+        add_regression_line = st.checkbox("Add regression line")
+        if add_regression_line:
+
+            scatter_with_regline = scatter_plot + scatter_plot.transform_regression(var1, var2).mark_line(color="red")
+            st.altair_chart(scatter_with_regline, use_container_width=True)
+        
 
         add_color_var = st.checkbox("Add 'subs_cat' or other variable as color")
         if add_color_var:
@@ -357,7 +388,7 @@ if uploaded_data_file is not None:
             combined_plot_data = pd.concat([var1_series, var2_series, var3_series], axis=1)
 
             combined_plot = alt.Chart(combined_plot_data).mark_circle(size=60).encode(
-                x=var1,
+                x=alt.X(f"{var1}").axis(format='%'),
                 y=var2,
                 color = var3
             ).interactive()
@@ -377,7 +408,7 @@ if uploaded_data_file is not None:
             combined_plot_data = pd.concat([var1_series, var2_series, var3_series], axis=1)
 
             combined_plot = alt.Chart(combined_plot_data).mark_circle(size=60).encode(
-                x=var1,
+                x=alt.X(f"{var1}").axis(format='%'),
                 y=var2,
                 color = var3
             ).interactive()
@@ -385,6 +416,31 @@ if uploaded_data_file is not None:
             #st.altair_chart(combined_plot + combined_plot.transform_regression(var1_series, var2_series).mark_line())
 
             st.altair_chart(combined_plot, use_container_width=True)
+
+    if simple_scatter:
+        st.subheader("Simple Scatter Plots")
+
+        table_filtered = table_filtered[["load_avg", "ox_eff_avg"]]
+        simple_scatter_plot = alt.Chart(table_filtered).mark_circle(size = 60).encode(
+            x = "load_avg",
+            y = alt.Y("ox_eff_avg").axis(format='%'),
+        ).interactive()
+
+        st.altair_chart(simple_scatter_plot, use_container_width=True)
+
+        add_regression_line = st.checkbox("Add regression line:")
+        if add_regression_line:
+        
+            corr_table = table_filtered[["load_avg", "ox_eff_avg"]].dropna()
+
+            st.write(f"Correlation (Person): {scipy.stats.pearsonr(corr_table["load_avg"], corr_table["ox_eff_avg"])[0]}")
+            st.write(f"Correlation (Spearman): {scipy.stats.spearmanr(corr_table["load_avg"], corr_table["ox_eff_avg"])[0]}")
+            st.write(f"Correlation (Kendall): {scipy.stats.kendalltau(corr_table["load_avg"], corr_table["ox_eff_avg"])[0]}")
+
+
+            simple_scatter_plot_with_line = simple_scatter_plot + simple_scatter_plot.transform_regression("load_avg", "ox_eff_avg").mark_line(color = "red") 
+            st.altair_chart(simple_scatter_plot_with_line, use_container_width=True)
+        
 
     if multifeature_scatter:
         st.subheader("Multifeature Scatter Plots")
@@ -398,13 +454,13 @@ if uploaded_data_file is not None:
             
 
             #options_two = table_filtered.columns
-            var1_m = st.selectbox("Please select the Stress variables you want to visualize on the Y-axis",
+            var1_m = st.selectbox("Please select the Stress variables you want to visualize on the X-axis",
                             options=options_one)
             var1_series_m = table_filtered[var1_m]
 
         with col2_m:
-            options_two = table_filtered[["ox_eff_avg"]].columns
-            var2_m = st.selectbox("Please select the Measurement variable you want to visualize on the X-axis",
+            options_two = table_filtered[["load_avg"]].columns
+            var2_m = st.selectbox("Please select the Measurement variable you want to visualize on the Y-axis",
                             options = options_two)
             var2_series_m = table_filtered[var2_m]
 
@@ -418,18 +474,28 @@ if uploaded_data_file is not None:
 
         st.altair_chart(combined_plot, use_container_width=True)
 
+
+
         add_regression_line = st.checkbox("Add regression line:")
         if add_regression_line:
 
             st.write("Variable 1 is: ", var1_m)
             st.write("Variable 2 is: ", var2_m)
 
-            final_plot = combined_plot + combined_plot.transform_regression(var1_m, var2_m).mark_line() 
+        
+            corr_table = table_filtered[[var1_m, var2_m]].dropna()
+
+            st.write(f"Correlation (Person): {scipy.stats.pearsonr(corr_table[var1_m], corr_table[var2_m])[0]}")
+            st.write(f"Correlation (Spearman): {scipy.stats.spearmanr(corr_table[var1_m], corr_table[var2_m])[0]}")
+            st.write(f"Correlation (Kendall): {scipy.stats.kendalltau(corr_table[var1_m], corr_table[var2_m])[0]}")
+
+
+            final_plot = combined_plot + combined_plot.transform_regression(var1_m, var2_m).mark_line(color = "red") 
             st.altair_chart(final_plot, use_container_width=True)
 
         add_color_var = st.checkbox("Add 'ox_eff_avg' or other variable as color")
         if add_color_var:
-            options_three = table_filtered[["pH"]].columns
+            options_three = table_filtered[["ox_eff_avg"]].columns
 
             var3_m = st.selectbox("Select variable for coloring:",
                                 options=options_three
@@ -484,11 +550,20 @@ if uploaded_data_file is not None:
         histogram_variable_selection = st.multiselect("Pick the column(s) you want to visualize in layered histogram:",
                    table_filtered.columns,
                    default = ["gdl_cm", "pH", "col_rad"],
-                   placeholder="Select 3 desired columns ...")
+                   placeholder="Select up to 3 desired columns ...")
 
         
         table_filtered_hist_vars = table_filtered[histogram_variable_selection]
         
+        if len(histogram_variable_selection) == 1:
+            simple_hist = alt.Chart(table_filtered_hist_vars).mark_bar().encode(
+                alt.X(f"{histogram_variable_selection[0]}:Q", bin=True),
+                y='count()',
+            )
+
+            st.altair_chart(simple_hist, use_container_width=True)
+
+
         if len(histogram_variable_selection) == 2:
 
             layered_hist_plot = alt.Chart(table_filtered_hist_vars).transform_fold(
