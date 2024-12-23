@@ -371,6 +371,12 @@ if uploaded_data_file is not None:
         add_regression_line = st.checkbox("Add regression line")
         if add_regression_line:
 
+            st.write(f'Correlation (Person): {scipy.stats.pearsonr(corr_table[var1], corr_table[var2])[0]}')
+            st.write(f'Correlation (Spearman): {scipy.stats.spearmanr(corr_table[var1], corr_table[var2])[0]}')
+            st.write(f'Correlation (Kendall): {scipy.stats.kendalltau(corr_table[var1], corr_table[var2])[0]}')
+
+
+
             scatter_with_regline = scatter_plot + scatter_plot.transform_regression(var1, var2).mark_line(color="red")
             st.altair_chart(scatter_with_regline, use_container_width=True)
         
