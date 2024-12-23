@@ -513,6 +513,26 @@ if uploaded_data_file is not None:
 
             st.altair_chart(combined_plot, use_container_width=True)
 
+        add_size_var = st.checkbox("Add 'ox_eff_avg' or other variable represented by size")
+        if add_size_var:
+            options_three = table_filtered[["ox_eff_avg"]].columns
+
+            var3_m = st.selectbox("Select variable for size:",
+                                options=options_three
+                                )
+            
+            var3_series_m = table_filtered[var3_m]
+
+            combined_plot_data = pd.concat([var1_series_m, var2_series_m, var3_series_m], axis=1)
+
+            combined_plot = alt.Chart(combined_plot_data).mark_circle(size=60).encode(
+                x=var1_m,
+                y=var2_m,
+                size = var3_m
+            ).interactive()
+
+            st.altair_chart(combined_plot, use_container_width=True)
+
     if simple_hist:
         hist_cols = ["gdl_cm",
                 "col_rad",
