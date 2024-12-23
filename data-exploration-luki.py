@@ -450,7 +450,7 @@ if uploaded_data_file is not None:
         with col1_m:
 
             options_one = table_filtered[["pH", "compaction", "bulk_dens", "poros", "wc", "whc", "RA7",
-              "el_cond", "amb_temp", "in_temp", "oc", "mc", "ch4_conc"]].columns
+              "el_cond", "amb_temp", "in_temp", "oc", "mc", "ch4_conc", "days", "subs_cat", "subs_cm", "area"]].columns
             
 
             #options_two = table_filtered.columns
@@ -496,6 +496,26 @@ if uploaded_data_file is not None:
         add_color_var = st.checkbox("Add 'ox_eff_avg' or other variable as color")
         if add_color_var:
             options_three = table_filtered[["ox_eff_avg"]].columns
+
+            var3_m = st.selectbox("Select variable for coloring:",
+                                options=options_three
+                                )
+            
+            var3_series_m = table_filtered[var3_m]
+
+            combined_plot_data = pd.concat([var1_series_m, var2_series_m, var3_series_m], axis=1)
+
+            combined_plot = alt.Chart(combined_plot_data).mark_circle(size=60).encode(
+                x=var1_m,
+                y=var2_m,
+                color = var3_m
+            ).interactive()
+
+            st.altair_chart(combined_plot, use_container_width=True)
+
+        add_color_var_trial = st.checkbox("Add 'trial_type' as color")
+        if add_color_var_trial:
+            options_three = table_filtered[["trial_type"]].columns
 
             var3_m = st.selectbox("Select variable for coloring:",
                                 options=options_three
