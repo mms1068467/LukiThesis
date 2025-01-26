@@ -171,6 +171,30 @@ if uploaded_data_file is not None:
 
         st.altair_chart(c1 + c2)
 
+        # trial_type radial chart
+
+        st.subheader("Radial Chart for trial_type")
+
+        table_filtered_trial_type = table_filtered[["trial_type", "Number"]]
+        
+        table_filtered_trial_type = table_filtered_trial_type.groupby("trial_type").count().reset_index()
+        st.write(table_filtered_trial_type)
+        
+        table_filtered_trial_type = table_filtered_trial_type.rename(columns = {"Number": "trial_type_count"})
+
+
+        base_pl = alt.Chart(table_filtered_trial_type).encode(
+            alt.Theta("trial_type_count:Q").stack(True),
+            alt.Radius("trial_type_count").scale(type="sqrt", zero=True, rangeMin=20),
+            color="trial_type:N",
+        )
+
+        c1_t = base.mark_arc(innerRadius=20, stroke="#fff")
+
+        c2_t = base.mark_text(radiusOffset=10).encode(text="trial_type_count:Q")
+
+        st.altair_chart(c1_t + c2_t)
+
     if pie_chart:
         table_filtered_gdl_subs = table_filtered[["gdl_subs", "Unnamed: 0"]]
         
