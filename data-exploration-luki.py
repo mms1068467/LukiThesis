@@ -4,7 +4,8 @@ import os
 import pandas as pd
 import numpy as np
 import scipy
-
+import matplotlib.pyplot as plt
+import seaborn as sns
 import altair as alt
 from io import BytesIO
 
@@ -655,10 +656,17 @@ if uploaded_data_file is not None:
     if correlation_plot:
         st.write("Correlations")
         table_filtered_corr = table_filtered[["pH", "compaction", "bulk_dens", "poros", "wc", "whc", "RA7", "el_cond", "amb_temp", "in_temp",
-        "oc", "col_rad", "days", "subs_cm", "gdl_cm", "year", "load_avg",
+        "oc", "col_rad", "subs_cm", "gdl_cm", "load_avg",
         "ox_eff_avg"]]
         corr = table_filtered_corr.corr()
-        st.write(corr.style.background_gradient(cmap='coolwarm'))
+        #st.write(corr.style.background_gradient(cmap='coolwarm'))
+
+        f, ax = plt.subplots(figsize=(10, 8))
+        sns.heatmap(corr,
+            cmap=sns.diverging_palette(220, 10, as_cmap=True),
+            vmin=-1.0, vmax=1.0,
+            square=True, ax=ax,
+            annot = True)
 
     ##### CMD + Shift + /
     # col1, col2 = st.columns(2, gap="medium")
