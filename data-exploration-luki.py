@@ -195,10 +195,10 @@ if uploaded_data_file is not None:
         st.altair_chart(c1_t + c2_t)
 
     if pie_chart:
-        table_filtered_gdl_subs = table_filtered[["gdl_subs", "Unnamed: 0"]]
+        table_filtered_gdl_subs = table_filtered[["gdl_subs", "Number"]]
         
         table_filtered_gdl_subs = table_filtered_gdl_subs.groupby("gdl_subs").count().reset_index()
-        table_filtered_gdl_subs = table_filtered_gdl_subs.rename(columns = {"gdl_subs": "gdl_subs_type", "Unnamed: 0": "gdl_subs_count"})
+        table_filtered_gdl_subs = table_filtered_gdl_subs.rename(columns = {"gdl_subs": "gdl_subs_type", "Number": "gdl_subs_count"})
 
         alt.Chart(table_filtered).mark_arc().encode(
             theta="gdl_subs_count",
