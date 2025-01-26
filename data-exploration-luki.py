@@ -380,7 +380,7 @@ if uploaded_data_file is not None:
 
 
 
-            scatter_with_regline = scatter_plot + scatter_plot.transform_regression(var1_series, var2_series).mark_line(color="red")
+            scatter_with_regline = scatter_plot + scatter_plot.transform_regression(var1, var2).mark_line(color="red")
             st.altair_chart(scatter_with_regline, use_container_width=True)
         
 
