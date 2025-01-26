@@ -372,6 +372,8 @@ if uploaded_data_file is not None:
         add_regression_line = st.checkbox("Add regression line")
         if add_regression_line:
 
+            corr_table = table_filtered[[var1, var2]].dropna()
+
             st.write(f'Correlation (Person): {scipy.stats.pearsonr(corr_table[var1], corr_table[var2])[0]}')
             st.write(f'Correlation (Spearman): {scipy.stats.spearmanr(corr_table[var1], corr_table[var2])[0]}')
             st.write(f'Correlation (Kendall): {scipy.stats.kendalltau(corr_table[var1], corr_table[var2])[0]}')
