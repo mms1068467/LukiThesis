@@ -200,10 +200,12 @@ if uploaded_data_file is not None:
         table_filtered_gdl_subs = table_filtered_gdl_subs.groupby("gdl_subs").count().reset_index()
         table_filtered_gdl_subs = table_filtered_gdl_subs.rename(columns = {"gdl_subs": "gdl_subs_type", "Number": "gdl_subs_count"})
 
-        alt.Chart(table_filtered).mark_arc().encode(
+        pie_c = alt.Chart(table_filtered).mark_arc().encode(
             theta="gdl_subs_count",
             color="gdl_subs_type"
         )
+
+    st.altair_chart(pie_c)
 
     if cumsum_linechart:
         st.subheader("Cumulative Sum Line Chart Country")
