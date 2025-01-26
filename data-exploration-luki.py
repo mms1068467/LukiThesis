@@ -662,13 +662,13 @@ if uploaded_data_file is not None:
         #st.write(corr.style.background_gradient(cmap='coolwarm'))
 
         f, ax = plt.subplots(figsize=(10, 8))
-        cor_mat_plot = sns.heatmap(corr,
+        sns.heatmap(corr,
             cmap=sns.diverging_palette(220, 10, as_cmap=True),
             vmin=-1.0, vmax=1.0,
             square=True, ax=ax,
             annot = True)
 
-        st.write(cor_mat_plot)
+        st.write(f)
 
     ##### CMD + Shift + /
     # col1, col2 = st.columns(2, gap="medium")
