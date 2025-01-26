@@ -667,7 +667,7 @@ if uploaded_data_file is not None:
             vmin=-1.0, vmax=1.0,
             square=True, ax=ax,
             annot = True,
-            fmt='.2g')
+            fmt='.1g')
 
         st.write(f)
 
