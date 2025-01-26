@@ -151,12 +151,12 @@ if uploaded_data_file is not None:
     if radial_chart:
         st.subheader("Radial Chart for subs_cat")
 
-        table_filtered_subs_cat = table_filtered[["subs_cat"]]
+        table_filtered_subs_cat = table_filtered[["subs_cat", "Number"]]
         
         table_filtered_subs_cat = table_filtered_subs_cat.groupby("subs_cat").count().reset_index()
         st.write(table_filtered_subs_cat)
         
-        table_filtered_subs_cat = table_filtered_subs_cat.rename(columns = {"subs_cat": "subs_cat_type", "Unnamed: 0": "subs_cat_count"})
+        table_filtered_subs_cat = table_filtered_subs_cat.rename(columns = {"subs_cat": "subs_cat_type", "Number": "subs_cat_count"})
 
 
         base = alt.Chart(table_filtered_subs_cat).encode(
