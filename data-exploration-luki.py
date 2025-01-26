@@ -666,7 +666,8 @@ if uploaded_data_file is not None:
             cmap=sns.diverging_palette(220, 10, as_cmap=True),
             vmin=-1.0, vmax=1.0,
             square=True, ax=ax,
-            annot = True)
+            annot = True,
+            fmt='.2g')
 
         st.write(f)
 
