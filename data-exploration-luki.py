@@ -203,8 +203,8 @@ if uploaded_data_file is not None:
         st.write(table_filtered_gdl_subs)
 
         pi = alt.Chart(table_filtered).mark_arc().encode(
-            theta="gdl_subs_count",
-            color="gdl_subs_type"
+            theta="gdl_subs_count:Q",
+            color="gdl_subs_type:N"
         )
 
         st.altair_chart(pi, use_container_width=True)
