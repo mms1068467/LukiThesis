@@ -205,7 +205,7 @@ if uploaded_data_file is not None:
             color="gdl_subs_type"
         )
 
-    st.altair_chart(pie_c)
+        st.altair_chart(pie_c)
 
     if cumsum_linechart:
         st.subheader("Cumulative Sum Line Chart Country")
