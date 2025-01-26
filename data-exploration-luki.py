@@ -349,7 +349,7 @@ if uploaded_data_file is not None:
 
         with col2:
 
-            options_two = table_filtered[["pH", "compaction", "bulk_dens", "poros", "wc", "whc", "RA7",
+            options_two = table_filtered[["pH", "subs_cm", "gdl_cm", "compaction", "bulk_dens", "poros", "wc", "whc", "RA7",
               "el_cond", "amb_temp", "in_temp", "oc", "mc", "ch4_conc"]].columns
             
 
