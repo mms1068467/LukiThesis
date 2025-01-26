@@ -4,5 +4,6 @@ openpyxl
 streamlit
 scipy
 pandas
+seaborn
 
 
