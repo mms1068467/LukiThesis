@@ -687,7 +687,7 @@ if uploaded_data_file is not None:
     if correlation_plot:
         st.write("Correlations")
         table_filtered_corr = table_filtered[["pH", "compaction", "bulk_dens", "poros", "wc", "whc", "RA7", "el_cond", "amb_temp", "in_temp",
-        "oc", "col_rad", "subs_cm", "gdl_cm", "load_avg",
+        "oc", "col_rad", "subs_cm", "gdl_cm", "load_avg", "mc", "ch4_conc",
         "ox_eff_avg"]]
         corr = table_filtered_corr.corr()
         #st.write(corr.style.background_gradient(cmap='coolwarm'))
